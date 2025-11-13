@@ -39,7 +39,7 @@ if (isset($_POST['simpan_pengadaan'])) {
 
         Query::hitung_value_pengadaan($conn, $idpengadaan);
 
-        header("Location: read_pengadaan.php");
+        header("Location: pengadaan.php");
         exit;
     } else {
         echo "Gagal insert pengadaan: " . $conn->error;
