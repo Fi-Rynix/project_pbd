@@ -6,16 +6,11 @@
   $view = isset($_GET['view']) && in_array($_GET['view'], $jenis_view) ? $_GET['view'] : 'all';
 
   if ($view === 'aktif') {
-    $query = Query::read_margin_aktif($conn);
+    $margin_list = Query::read_margin_aktif($conn);
   } else {
-    $query = Query::read_margin_all($conn);
+    $margin_list = Query::read_margin_all($conn);
   }
 
-  if (!$query) {
-    $result_arr = [];
-  } else {
-    $result_arr = $query->fetch_all(MYSQLI_ASSOC);
-  }
 ?>
 
 <!DOCTYPE html>
@@ -71,12 +66,12 @@
             <th>Besaran Persen (desimal)</th>
             <th>Status</th>
             <th>Dibuat Oleh</th>
-            <th>DIperbarui Pada</th>
+            <th>Diperbarui Pada</th>
           </tr>
         </thead>
         <tbody>
           <?php
-            foreach($result_arr as $row){ ?>
+            foreach($margin_list as $row){ ?>
             <tr>
               <td><?php echo $row['nomor_margin']; ?></td>
               <td><?php echo $row['dibuat_pada']; ?></td>

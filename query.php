@@ -6,49 +6,49 @@ class Query {
     $query = $conn->prepare("SELECT * FROM barang_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_barang_aktif($conn) {
     $query = $conn->prepare("SELECT * FROM barang_aktif_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_margin_all($conn) {
     $query = $conn->prepare("SELECT * FROM margin_penjualan_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_margin_aktif($conn) {
     $query = $conn->prepare("SELECT * FROM margin_penjualan_aktif_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_satuan_all($conn) {
     $query = $conn->prepare("SELECT * FROM satuan_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_satuan_aktif($conn) {
     $query = $conn->prepare("SELECT * FROM satuan_aktif_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_vendor_all($conn) {
     $query = $conn->prepare("SELECT * FROM vendor_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_vendor_aktif($conn) {
@@ -62,14 +62,14 @@ class Query {
     $query = $conn->prepare("SELECT * FROM role_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_user($conn) {
     $query = $conn->prepare("SELECT * FROM user_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
 
@@ -78,18 +78,18 @@ class Query {
     $query = $conn->prepare("SELECT * FROM pengadaan_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_detail_pengadaan($conn, $idpengadaan) {
     $query = $conn->prepare("
       SELECT p.nomor_pengadaan, p.waktu_pengadaan, p.nomor_user, p.nama_user, p.subtotal_pengadaan, p.ppn_pengadaan, p.total_pengadaan, p.nomor_vendor, p.nama_vendor, p.status_pengadaan,
               dp.iddetail_pengadaan, dp.harga_satuan, dp.jumlah, dp.sub_total,
-              b.nama_barang, b.jenis_barang, s.nama_satuan
+              b.nama, b.jenis, s.nama_satuan
       FROM pengadaan_vu p
       JOIN detail_pengadaan dp ON p.nomor_pengadaan = dp.idpengadaan
-      JOIN barang_aktif_vu b ON dp.idbarang = b.nomor_barang
-      JOIN satuan_aktif_vu s ON b.idsatuan = s.nomor_satuan
+      JOIN barang b ON dp.idbarang = b.idbarang
+      JOIN satuan s ON b.idsatuan = s.idsatuan
       WHERE p.nomor_pengadaan = ?"
     );
     $query->bind_param("i", $idpengadaan);
@@ -109,7 +109,6 @@ class Query {
     $result = $query->get_result();
     return $result->fetch_all(MYSQLI_ASSOC);
 }
-
 
   public static function insert_pengadaan($conn, $iduser, $idvendor) {
     $stmt = $conn->prepare("INSERT INTO pengadaan (iduser, idvendor) VALUES (?, ?)");

@@ -6,16 +6,11 @@
   $view = isset($_GET['view']) && in_array($_GET['view'], $allowed_views) ? $_GET['view'] : 'all';
 
   if ($view === 'aktif') {
-    $query = Query::read_vendor_aktif($conn);
+    $vendor_list = Query::read_vendor_aktif($conn);
   } else {
-    $query = Query::read_vendor_all($conn);
+    $vendor_list = Query::read_vendor_all($conn);
   }
 
-  if (!$query) {
-    $result_arr = [];
-  } else {
-    $result_arr = $query->fetch_all(MYSQLI_ASSOC);
-  }
 ?>
 
 <!DOCTYPE html>
@@ -75,7 +70,7 @@
         <tbody>
           <?php
             
-            foreach($result_arr as $row){ ?>
+            foreach($vendor_list as $row){ ?>
             <tr>
               <td><?php echo $row['nomor_vendor']; ?></td>
               <td><?php echo $row['nama_vendor']; ?></td>

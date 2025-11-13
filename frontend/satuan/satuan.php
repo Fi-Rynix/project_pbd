@@ -6,15 +6,11 @@
   $view = isset($_GET['view']) && in_array($_GET['view'], $jenis_view) ? $_GET['view'] : 'all';
 
   if ($view === 'aktif') {
-    $query = Query::read_satuan_aktif($conn);
+    $satuan_list = Query::read_satuan_aktif($conn);
   } else {
-    $query = Query::read_satuan_all($conn);
+    $satuan_list = Query::read_satuan_all($conn);
   }
-  if (!$query) {
-    $result_arr = [];
-  } else {
-    $result_arr = $query->fetch_all(MYSQLI_ASSOC);
-  }
+
 ?>
 
 <!DOCTYPE html>
@@ -73,7 +69,7 @@
         <tbody>
           <?php
             
-            foreach($result_arr as $row){ ?>
+            foreach($satuan_list as $row){ ?>
             <tr>
               <td><?php echo $row['nomor_satuan']; ?></td>
               <td><?php echo $row['nama_satuan']; ?></td>

@@ -2,8 +2,7 @@
   include '../../koneksi.php';
   include '../../query.php';
 
-  $query = Query::read_user($conn);
-  $result_arr = $query->fetch_all(MYSQLI_ASSOC);
+  $user_list = Query::read_user($conn);
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +40,7 @@
         </thead>
         <tbody>
           <?php
-            foreach($result_arr as $row){ ?>
+            foreach($user_list as $row){ ?>
             <tr>
               <td><?php echo $row['nomor_user']; ?></td>
               <td><?php echo $row['nama_user']; ?></td>

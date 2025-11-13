@@ -2,8 +2,7 @@
   include '../../koneksi.php';
   include '../../query.php';
 
-  $query = Query::read_pengadaan($conn);
-  $result_arr = $query->fetch_all(MYSQLI_ASSOC);
+  $pengadaan_list = Query::read_pengadaan($conn);
 ?>
 
 <!DOCTYPE html>
@@ -29,7 +28,7 @@
 
   <body>
     <?php include '../Navbar/navbar.php'; ?>
-    <h1>Tabel User</h1>
+    <h1>Tabel Pengadaan</h1>
     <main>
       <button><a href="insert_pengadaan.php">Tambah Pengadaan</a></button>
       <table>
@@ -48,7 +47,7 @@
         </thead>
         <tbody>
           <?php
-            foreach($result_arr as $row){ ?>
+            foreach($pengadaan_list as $row){ ?>
             <tr>
               <td><?php echo $row['nomor_pengadaan']; ?></td>
               <td><?php echo $row['waktu_pengadaan']; ?></td>

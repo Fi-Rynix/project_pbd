@@ -2,8 +2,7 @@
   include '../../koneksi.php';
   include '../../query.php';
 
-  $query = Query::read_role($conn);
-  $result_arr = $query->fetch_all(MYSQLI_ASSOC);
+  $role_list = Query::read_role($conn);
 ?>
 
 <!DOCTYPE html>
@@ -40,7 +39,7 @@
         </thead>
         <tbody>
           <?php
-            foreach($result_arr as $row){ ?>
+            foreach($role_list as $row){ ?>
             <tr>
               <td><?php echo $row['nomor_role']; ?></td>
               <td><?php echo $row['nama_role']; ?></td>
