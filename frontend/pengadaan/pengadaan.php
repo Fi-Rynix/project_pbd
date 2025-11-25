@@ -56,7 +56,22 @@
               <td><?php echo $row['ppn_pengadaan']; ?></td>
               <td><?php echo $row['total_pengadaan']; ?></td>
               <td><?php echo $row['nama_vendor']; ?></td>
-              <td><?php echo $row['status_pengadaan'] === 'P' ? 'Proses' : 'Selesai' ; ?></td>
+              <td><?php
+                switch ($row['status_pengadaan']) {
+                  case 'M':
+                    echo 'Memesan';
+                    break;
+                  case 'P':
+                    echo 'Proses';
+                    break;
+                  case 'S':
+                    echo 'Selesai';
+                    break;
+                  case 'B':
+                    echo 'Batal';
+                    break;
+                }
+              ?></td>
               <td><a href="detail_pengadaan.php?nomor_pengadaan=<?php echo $row['nomor_pengadaan']; ?>">Detail</a></td>
             </tr>
           <?php } ?>

@@ -74,8 +74,8 @@
         <th>No</th>
         <th>Nama Barang</th>
         <th>Jenis</th>
-        <th>Satuan</th>
-        <th>Harga Satuan</th>
+        <th>Harga</th>
+        <th>Per-Satuan</th>
         <th>Jumlah</th>
         <th>Subtotal</th>
       </tr>
@@ -86,8 +86,8 @@
           <td><?= $i + 1 ?></td>
           <td><?= htmlspecialchars($row['nama']) ?></td>
           <td><?= htmlspecialchars($row['jenis']) ?></td>
-          <td><?= htmlspecialchars($row['nama_satuan']) ?></td>
           <td>Rp<?= number_format($row['harga_satuan'], 0, ',', '.') ?></td>
+          <td><?= htmlspecialchars($row['nama_satuan']) ?></td>
           <td><?= htmlspecialchars($row['jumlah']) ?></td>
           <td>Rp<?= number_format($row['sub_total'], 0, ',', '.') ?></td>
         </tr>

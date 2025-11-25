@@ -2,6 +2,10 @@
 
 class Query {
 
+
+// tabel master
+// tabel master
+// tabel master
   public static function read_barang_all($conn) {
     $query = $conn->prepare("SELECT * FROM barang_vu");
     $query->execute();
@@ -55,7 +59,7 @@ class Query {
     $query = $conn->prepare("SELECT * FROM vendor_aktif_vu");
     $query->execute();
     $result = $query->get_result();
-    return $result;
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
 
   public static function read_role($conn) {
@@ -73,7 +77,9 @@ class Query {
   }
 
 
-
+// pengadaan
+// pengadaan
+// pengadaan
   public static function read_pengadaan($conn) {
     $query = $conn->prepare("SELECT * FROM pengadaan_vu");
     $query->execute();
@@ -82,8 +88,8 @@ class Query {
   }
 
   public static function read_detail_pengadaan($conn, $idpengadaan) {
-    $query = $conn->prepare("
-      SELECT p.nomor_pengadaan, p.waktu_pengadaan, p.nomor_user, p.nama_user, p.subtotal_pengadaan, p.ppn_pengadaan, p.total_pengadaan, p.nomor_vendor, p.nama_vendor, p.status_pengadaan,
+    $query = $conn->prepare(
+      "SELECT p.nomor_pengadaan, p.waktu_pengadaan, p.nomor_user, p.nama_user, p.subtotal_pengadaan, p.ppn_pengadaan, p.total_pengadaan, p.nomor_vendor, p.nama_vendor, p.status_pengadaan,
               dp.iddetail_pengadaan, dp.harga_satuan, dp.jumlah, dp.sub_total,
               b.nama, b.jenis, s.nama_satuan
       FROM pengadaan_vu p
@@ -108,7 +114,7 @@ class Query {
     $query->execute();
     $result = $query->get_result();
     return $result->fetch_all(MYSQLI_ASSOC);
-}
+  }
 
   public static function insert_pengadaan($conn, $iduser, $idvendor) {
     $stmt = $conn->prepare("INSERT INTO pengadaan (iduser, idvendor) VALUES (?, ?)");
@@ -117,25 +123,95 @@ class Query {
     return true;
   }
 
-  public static function get_last_idpengadaan($conn) {
-      $result = $conn->query("SELECT MAX(idpengadaan) AS idpengadaan FROM pengadaan");
-      $data = $result->fetch_assoc();
-      return $data['idpengadaan'];
+  // public static function get_last_idpengadaan($conn) {
+  //   $result = $conn->query("SELECT MAX(idpengadaan) AS idpengadaan FROM pengadaan");
+  //   $data = $result->fetch_assoc();
+  //   return $data['idpengadaan'];
+  // }
+
+  public static function insert_detail_pengadaan($conn, $idbarang, $jumlah) {
+    $stmt = $conn->prepare("CALL insert_detail_pengadaan(?, ?)");
+    $stmt->bind_param("ii", $idbarang, $jumlah);
+    $stmt->execute();
+    return true;
   }
 
-  public static function insert_detail_pengadaan($conn, $idpengadaan, $idbarang, $jumlah) {
-      $stmt = $conn->prepare("CALL insert_detail_pengadaan(?, ?, ?)");
-      $stmt->bind_param("iii", $idpengadaan, $idbarang, $jumlah);
-      $stmt->execute();
-      return true;
+  public static function hitung_value_pengadaan($conn) {
+    $stmt = $conn->prepare("CALL hitung_value_pengadaan()");
+    $stmt->execute();
+    return true;
   }
 
-  public static function hitung_value_pengadaan($conn, $idpengadaan) {
-      $stmt = $conn->prepare("CALL hitung_value_pengadaan(?)");
-      $stmt->bind_param("i", $idpengadaan);
-      $stmt->execute();
-      return true;
+
+
+// penerimaan
+// penerimaan
+// penerimaan
+  public static function read_pengadaan_aktif($conn) {
+    $query = $conn->prepare("SELECT * FROM pengadaan_vu WHERE status_pengadaan = 'M'");
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
   }
+
+  public static function read_pengadaan_proses($conn) {
+    $query = $conn->prepare("SELECT * FROM pengadaan_vu WHERE status_pengadaan = 'P'");
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public static function read_pengadaan_selesai($conn) {
+    $query = $conn->prepare("SELECT * FROM pengadaan_vu WHERE status_pengadaan = 'S'");
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public static function read_penerimaan_by_pengadaan($conn, $idpengadaan) {
+    $query = $conn->prepare("SELECT * FROM penerimaan_vu WHERE nomor_pengadaan = ?"
+    );
+    $query->bind_param("i", $idpengadaan);
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public static function get_barang_by_pengadaan($conn, $idpengadaan) {
+    $query = $conn->prepare(
+      "SELECT dp.idbarang, b.nama, dp.harga_satuan, s.nama_satuan, dp.jumlah
+      FROM detail_pengadaan dp
+      JOIN barang b ON dp.idbarang = b.idbarang
+      JOIN satuan s ON b.idsatuan = s.idsatuan
+      WHERE dp.idpengadaan = ?"
+    );
+    $query->bind_param("i", $idpengadaan);
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public static function insert_penerimaan($conn, $iduser, $idpengadaan) {
+    $stmt = $conn->prepare("INSERT INTO penerimaan (iduser, idpengadaan) VALUES (?, ?)");
+    $stmt->bind_param("ii", $iduser, $idpengadaan);
+    $stmt->execute();
+    return true;
+  }
+
+  public static function insert_detail_penerimaan($conn, $idbarang, $jumlah_terima, $harga_satuan) {
+    try {
+        $stmt = $conn->prepare("CALL insert_detail_penerimaan(?, ?, ?)");
+        $stmt->bind_param("iii", $idbarang, $jumlah_terima, $harga_satuan);
+        $stmt->execute();
+        return true;
+    } catch (mysqli_sql_exception $e) {
+        return $e->getMessage();
+    }
+}
+
+
+
+
 
 
 

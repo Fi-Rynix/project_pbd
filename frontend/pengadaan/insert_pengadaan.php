@@ -27,17 +27,17 @@ if (isset($_POST['simpan_pengadaan'])) {
 
 
     if (Query::insert_pengadaan($conn, $iduser, $idvendor)) {
-        $idpengadaan = Query::get_last_idpengadaan($conn);
+        // $idpengadaan = Query::get_last_idpengadaan($conn);
 
         for ($i = 0; $i < count($idbarangArr); $i++) {
             $idbarang = $idbarangArr[$i];
             $jumlah = $jumlahArr[$i];
             if (!empty($idbarang) && !empty($jumlah)) {
-                Query::insert_detail_pengadaan($conn, $idpengadaan, $idbarang, $jumlah);
+                Query::insert_detail_pengadaan($conn, $idbarang, $jumlah);
             }
         }
 
-        Query::hitung_value_pengadaan($conn, $idpengadaan);
+        Query::hitung_value_pengadaan($conn);
 
         header("Location: pengadaan.php");
         exit;
@@ -68,15 +68,19 @@ if (isset($_POST['simpan_pengadaan'])) {
         <label>Vendor:</label>
         <select name="idvendor" required onchange="this.form.submit()">
             <option value="">-- Pilih Vendor --</option>
-            <?php
-            $vendor_list->data_seek(0);
+            <?php foreach ($vendor_list as $v):
+                $sel = ($idvendor == $v['nomor_vendor']) ? 'selected' : '';
+                echo "<option value='{$v['nomor_vendor']}' $sel>{$v['nama_vendor']}</option>";
+            endforeach; ?>
+        </select>
+            <!-- $vendor_list->data_seek(0);
             while ($v = $vendor_list->fetch_assoc()) {
                 $sel = ($idvendor == $v['nomor_vendor']) ? 'selected' : '';
                 echo "<option value='{$v['nomor_vendor']}' $sel>{$v['nama_vendor']}</option>";
             }
             ?>
-        </select>
-        <noscript><button type="submit">Tampilkan Barang</button></noscript>
+        </select> -->
+        <!-- <noscript><button type="submit">Tampilkan Barang</button></noscript> -->
     </form>
 
 <?php if (!empty($idvendor) && count($barang) > 0): ?>
