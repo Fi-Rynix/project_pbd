@@ -28,7 +28,9 @@
 
   <body>
     <?php include '../Navbar/navbar.php'; ?>
+    
     <h1>Tabel User</h1>
+    <a href="tambah_user.php" class="btn">Tambah User</a>
     <main>
       <table>
         <thead>
@@ -36,6 +38,7 @@
             <th>ID User</th>
             <th>Username</th>
             <th>Id Role</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -45,6 +48,10 @@
               <td><?php echo $row['nomor_user']; ?></td>
               <td><?php echo $row['nama_user']; ?></td>
               <td><?php echo $row['nama_role']; ?></td>
+              <td>
+                  <a href="edit_user.php?iduser=<?php echo $row['nomor_user']; ?>">Edit</a>
+              </td>
+
             </tr>
           <?php } ?>
         </tbody>

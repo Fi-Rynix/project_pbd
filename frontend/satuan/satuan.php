@@ -48,6 +48,8 @@
   <body>
     <?php include '../Navbar/navbar.php'; ?>
     <h1>Tabel Satuan</h1>
+    <a href="tambah_satuan.php">Tambah Satuan</a>
+
     <div class="view-controls">
       <form method="get" id="viewForm">
         <label for="view">Tampilkan: </label>
@@ -64,6 +66,7 @@
             <th>ID Satuan</th>
             <th>Nama Satuan</th>
             <th>Status</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -74,6 +77,13 @@
               <td><?php echo $row['nomor_satuan']; ?></td>
               <td><?php echo $row['nama_satuan']; ?></td>
               <td><?php echo $row['status_satuan'] ? 'Aktif' : 'Tidak Aktif'; ?></td>
+              <td>
+                  <a href="edit_satuan.php?idsatuan=<?php echo $row['nomor_satuan']; ?>">Edit</a>
+                  <?php if($row['status_satuan'] == 1) { ?>
+                      | <a href="hapus_satuan.php?idsatuan=<?php echo $row['nomor_satuan']; ?>" onclick="return confirm('Yakin ingin hapus?')">Hapus</a>
+                  <?php } ?>
+              </td>
+
             </tr>
           <?php } ?>
         </tbody>

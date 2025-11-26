@@ -82,6 +82,7 @@ if (isset($_POST['simpan_penerimaan'])) {
 <body>
 
 <?php include '../navbar/navbar.php'; ?>
+<button><a href="rincian_penerimaan.php?nomor_pengadaan=<?= $idpengadaan ?>">Kembali</a></button>
 
 <h2>Tambah Penerimaan Barang</h2>
 

@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   'username'  => $row['username'],
                 ];
 
-                header('Location: datamaster.php');
+                header('Location: dashboard.php');
                 exit;
             } else {
                 $error = 'Password salah!';

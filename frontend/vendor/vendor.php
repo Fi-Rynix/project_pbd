@@ -48,6 +48,8 @@
   <body>
     <?php include '../Navbar/navbar.php'; ?>
     <h1>Tabel Vendor</h1>
+    <a href="tambah_vendor.php">Tambah Vendor</a>
+
     <div class="view-controls">
       <form method="get" id="viewForm">
         <label for="view">Tampilkan: </label>
@@ -60,11 +62,11 @@
     <main>
       <table>
         <thead>
-          <tr>
             <th>ID Vendor</th>
             <th>Nama Vendor</th>
             <th>Badan Hukum</th>
             <th>Status</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -76,6 +78,13 @@
               <td><?php echo $row['nama_vendor']; ?></td>
               <td><?php echo $row['badan_hukum'] === 'Y' ? 'Ya' : 'Tidak'; ?></td>
               <td><?php echo $row['status_vendor'] ? 'Aktif' : 'Tidak Aktif'; ?></td>
+              <td>
+                  <a href="edit_vendor.php?idvendor=<?php echo $row['nomor_vendor']; ?>">Edit</a>
+                  <?php if($row['status_vendor'] == 1) { ?>
+                      | <a href="hapus_vendor.php?idvendor=<?php echo $row['nomor_vendor']; ?>" onclick="return confirm('Yakin ingin hapus?')">Hapus</a>
+                  <?php } ?>
+              </td>
+
             </tr>
           <?php } ?>
         </tbody>

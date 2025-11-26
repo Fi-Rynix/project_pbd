@@ -61,6 +61,7 @@ if (isset($_POST['simpan_pengadaan'])) {
 </head>
 <body>
     <?php include '../navbar/navbar.php'; ?>
+    <button><a href="pengadaan.php">Kembali</a></button>
 
     <h2>Tambah Pengadaan Baru</h2>
 

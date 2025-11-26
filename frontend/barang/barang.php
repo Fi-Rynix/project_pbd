@@ -48,44 +48,60 @@
   <body>
     <?php include '../Navbar/navbar.php'; ?>
     <h1>Tabel Barang</h1>
-    <div class="view-controls">
-      <form method="get" id="viewForm">
-        <label for="view">Tampilkan: </label>
-        <select name="view" id="view" onchange="document.getElementById('viewForm').submit();">
-          <option value="all" <?php echo ($view === 'all') ? 'selected' : ''; ?>>Semua Barang</option>
-          <option value="aktif" <?php echo ($view === 'aktif') ? 'selected' : ''; ?>>Barang Aktif</option>
-        </select>
-      </form>
-    </div>
-    <main>
-      <table>
-        <thead>
-          <tr>
-            <th>ID Barang</th>
-            <th>Nama Barang</th>
-            <th>Jenis Barang</th>
-            <th>ID Satuan</th>
-            <th>Harga</th>
-            <th>Status</th>
-            <th>Vendor Penyedia</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-            
-            foreach($barang as $row){ ?>
-            <tr>
-              <td><?php echo $row['nomor_barang']; ?></td>
-              <td><?php echo $row['nama_barang']; ?></td>
-              <td><?php echo $row['jenis_barang']; ?></td>
-              <td><?php echo $row['nama_satuan']; ?></td>
-              <td><?php echo $row['harga_barang']; ?></td>
-              <td><?php echo $row['status_barang'] ? 'Aktif' : 'Tidak Aktif'; ?></td>
-              <td><?php echo $row['nama_vendor']; ?></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
-    </main>
-  </body>
-</html>
+
+<a href="tambah_barang.php" 
+   style="display:inline-block; padding:8px 12px; background:#4CAF50; 
+          color:white; text-decoration:none; border-radius:4px; margin-bottom:10px;">
+  + Tambah Barang
+</a>
+
+<div class="view-controls">
+  <form method="get" id="viewForm">
+    <label for="view">Tampilkan: </label>
+    <select name="view" id="view" onchange="document.getElementById('viewForm').submit();">
+      <option value="all" <?= $view === 'all' ? 'selected' : '' ?>>Semua Barang</option>
+      <option value="aktif" <?= $view === 'aktif' ? 'selected' : '' ?>>Barang Aktif</option>
+    </select>
+  </form>
+</div>
+
+<main>
+  <table>
+    <thead>
+      <tr>
+        <th>ID Barang</th>
+        <th>Nama Barang</th>
+        <th>Jenis Barang</th>
+        <th>Satuan</th>
+        <th>Harga</th>
+        <th>Status</th>
+        <th>Vendor</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($barang as $row): ?>
+        <tr>
+  <td><?= $row['nomor_barang']; ?></td>
+  <td><?= $row['nama_barang']; ?></td>
+  <td><?= $row['jenis_barang']; ?></td>
+  <td><?= $row['nama_satuan']; ?></td>
+  <td><?= $row['harga_barang']; ?></td>
+  <td><?= $row['status_barang'] ? 'Aktif' : 'Tidak Aktif'; ?></td>
+  <td><?= $row['nama_vendor']; ?></td>
+  <td>
+  <a href="edit_barang.php?idbarang=<?= $row['nomor_barang']; ?>">Edit</a>
+  <?php if ($row['status_barang'] == 1) { ?>
+    | <a href="hapus_barang.php?idbarang=<?= $row['nomor_barang']; ?>"
+        onclick="return confirm('Yakin hapus barang ini?');">
+        Hapus
+      </a>
+  <?php } ?>
+</td>
+
+
+</tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</main>

@@ -70,7 +70,7 @@
       <nav>
         <ul>
           <li>
-            <a href="../Dashboard/datamaster.php">Data Master</a>
+            <a href="../kartu_stok/stok.php">Kartu Stok</a>
           </li>
           <li class="dropdown">
             <a href="#">Transaksi</a>
@@ -82,7 +82,7 @@
             </div>
           </li>
           <li class="dropdown">
-            <a href="#">Quick Navigation</a>
+            <a href="#">Data Master</a>
             <div class="dropdown-content">
               <a href="../barang/barang.php">Data Barang</a>
               <a href="../role/role.php">Data Role</a>

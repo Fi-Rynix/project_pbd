@@ -64,7 +64,7 @@
                     echo 'Memesan';
                     break;
               } ?></td>
-              <td><a href="rincian_penerimaan.php?nomor_pengadaan=<?php echo $a['nomor_pengadaan']; ?>">Tambah</a><a href="">Batal</a></td>
+              <td><a href="rincian_penerimaan.php?nomor_pengadaan=<?php echo $a['nomor_pengadaan']; ?>">Tambah</a><a href="batalkan_pengadaan.php?nomor_pengadaan=<?php echo $a['nomor_pengadaan']; ?>">Batal</a></td>
             </tr>
           <?php } ?>
         </tbody>

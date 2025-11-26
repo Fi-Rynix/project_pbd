@@ -56,7 +56,7 @@
 </head>
 <body>
   <?php include '../Navbar/navbar.php'; ?>
-  <button><a href="penerimaan.php">Kembali</a></button>
+  <button><a href="penerimaan.php?nomor_pengadaan=<?= $idpengadaan ?>">Kembali</a></button>
   <br>
   <h1>Rincian Penerimaan Untuk Pengadaan#<?= htmlspecialchars($idpengadaan) ?></h1>
   <h2>Rincian Barang yang Diadakan</h2>
