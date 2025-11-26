@@ -91,7 +91,7 @@ if (isset($_POST['simpan_pengadaan'])) {
             <div id="barang-container">
                 <div class="barang-row">
                     <label>Barang:</label>
-                    <select name="idbarang[]" required>
+                    <select name="idbarang[]" class="barang-select" required onchange="updateDropdowns()">
                         <option value="">-- Pilih Barang --</option>
                         <?php foreach ($barang as $b): ?>
                             <option value="<?= $b['nomor_barang'] ?>">
@@ -124,6 +124,7 @@ if (isset($_POST['simpan_pengadaan'])) {
         newRow.querySelectorAll('input').forEach(el => el.value = '');
         newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
         container.appendChild(newRow);
+        updateDropdowns();
     }
 
     function hapusRow(btn) {
@@ -134,6 +135,28 @@ if (isset($_POST['simpan_pengadaan'])) {
             alert('Minimal 1 baris barang harus ada.');
         }
     }
+
+    function updateDropdowns() {
+    const selects = document.querySelectorAll('.barang-select');
+
+    const selectedValues = Array.from(selects)
+        .map(s => s.value)
+        .filter(v => v !== "");
+
+    selects.forEach(select => {
+        const currentValue = select.value;
+
+        Array.from(select.options).forEach(opt => {
+            if (opt.value === "") return;
+
+            opt.style.display = "block";
+
+            if (selectedValues.includes(opt.value) && opt.value !== currentValue) {
+                opt.style.display = "none";
+            }
+        });
+    });
+}
     </script>
 </body>
 </html>

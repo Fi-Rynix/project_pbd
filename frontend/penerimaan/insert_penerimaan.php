@@ -19,7 +19,8 @@ if (!isset($_SESSION['stok_penerimaan'][$idpengadaan])) {
         $_SESSION['stok_penerimaan'][$idpengadaan][$b['idbarang']] = [
             "nama"   => $b['nama'],
             "jumlah" => $b['jumlah'],        // jumlah yang didapat dari pengadaan
-            "satuan" => $b['nama_satuan']
+            "satuan" => $b['nama_satuan'],
+            "harga_satuan" => $b['harga_satuan']
         ];
     }
 }
@@ -103,7 +104,7 @@ if (isset($_POST['simpan_penerimaan'])) {
 
                 <?php foreach ($stok as $idb => $s): ?>
                     <?php if ($s['jumlah'] > 0): ?>
-                        <option value="<?= $idb ?>">
+                        <option value="<?= $idb ?>" data-harga="<?= $s['harga_satuan'] ?>">
                             <?= $s['nama'] ?> — (Sisa: <?= $s['jumlah'] . ' ' . $s['satuan'] ?>)
                         </option>
                     <?php endif; ?>
@@ -184,6 +185,20 @@ function updateDropdowns() {
         });
     });
 }
+
+document.addEventListener("change", function(e) {
+    if (e.target.classList.contains('barang-select')) {
+
+        const row = e.target.closest('.barang-row');
+        const hargaInput = row.querySelector('input[name="harga[]"]');
+        const selectedOption = e.target.options[e.target.selectedIndex];
+
+        const harga = selectedOption.getAttribute("data-harga") || 0;
+        hargaInput.value = harga;
+    }
+});
+
+
 </script>
 
 </body>
