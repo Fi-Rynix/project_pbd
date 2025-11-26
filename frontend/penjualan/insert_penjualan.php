@@ -4,67 +4,53 @@ include '../../koneksi.php';
 include '../../query.php';
 
 $iduser = $_SESSION['user']['id'];
-$idpengadaan = $_GET['nomor_pengadaan'];
 
-$barang = Query::get_barang_by_pengadaan($conn, $idpengadaan);
+$margin_aktif = Query::get_id_margin_aktif($conn);
+$idmargin = $margin_aktif;
 
-if (!isset($_SESSION['stok_penerimaan'][$idpengadaan])) {
+$barang = Query::get_barang_from_stok_tambah_margin($conn);
 
-    $_SESSION['stok_penerimaan'][$idpengadaan] = [];
+if (isset($_POST['simpan_penjualan'])) {
 
-    foreach ($barang as $b) {
-        $_SESSION['stok_penerimaan'][$idpengadaan][$b['idbarang']] = [
-            "nama"   => $b['nama'],
-            "jumlah" => $b['jumlah'],
-            "satuan" => $b['nama_satuan'],
-            "harga_satuan" => $b['harga_satuan']
-        ];
-    }
-}
-
-$stok = $_SESSION['stok_penerimaan'][$idpengadaan];
-
-if (isset($_POST['simpan_penerimaan'])) {
+    $idbarangArr = $_POST['idbarang'] ?? [];
+    $jumlahArr   = $_POST['jumlah'] ?? [];
 
     $conn->begin_transaction();
 
-    $tempStok = $_SESSION['stok_penerimaan'][$idpengadaan];
-
     try {
-        if (!Query::insert_penerimaan($conn, $iduser, $idpengadaan)) {
-            throw new Exception("Insert penerimaan gagal");
+
+        if (!Query::insert_penjualan($conn, $iduser, $idmargin)) {
+            throw new Exception("Gagal membuat penjualan.");
         }
 
-        foreach ($_POST['idbarang'] as $i => $idbarang) {
-            $jumlah_terima = (int) $_POST['jumlah'][$i];
-            $harga_satuan  = (int) $_POST['harga'][$i];
+        for ($i = 0; $i < count($idbarangArr); $i++) {
 
-            $tempStok[$idbarang]['jumlah'] -= $jumlah_terima;
-            if ($tempStok[$idbarang]['jumlah'] < 0) {
-                $tempStok[$idbarang]['jumlah'] = 0;
-            }
+            $idbarang = $idbarangArr[$i];
+            $jumlah   = $jumlahArr[$i];
 
-            $result = Query::insert_detail_penerimaan($conn, $idbarang, $jumlah_terima, $harga_satuan);
+            if (!empty($idbarang) && !empty($jumlah)) {
 
-            if ($result !== true) {
-                throw new Exception($result);
+                $result = Query::insert_detail_penjualan($conn, $idbarang, $jumlah);
+
+                if ($result !== true) {
+                    throw new Exception($result);
+                }
             }
         }
+
+        Query::hitung_value_penjualan($conn);
 
         $conn->commit();
 
-        $_SESSION['stok_penerimaan'][$idpengadaan] = $tempStok;
-
-        header("Location: rincian_penerimaan.php?nomor_pengadaan=$idpengadaan");
+        header("Location: penjualan.php");
         exit;
 
     } catch (Exception $e) {
-
-        echo "<script>alert('".$e->getMessage()."'); history.back();</script>";
+        $conn->rollback();
+        echo "<script>alert('Gagal: " . addslashes($e->getMessage()) . "'); history.back();</script>";
         exit;
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -93,22 +79,15 @@ if (isset($_POST['simpan_penerimaan'])) {
             <label>Barang:</label>
             <select name="idbarang[]" class="barang-select" required onchange="updateDropdowns()">
                 <option value="">-- Pilih Barang --</option>
-
-                <?php foreach ($stok as $idb => $s): ?>
-                    <?php if ($s['jumlah'] > 0): ?>
-                        <option value="<?= $idb ?>" data-harga="<?= $s['harga_satuan'] ?>">
-                            <?= $s['nama'] ?> — (Sisa: <?= $s['jumlah'] . ' ' . $s['satuan'] ?>)
-                        </option>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-
+                  <?php foreach ($barang as $b): ?>
+                    <option value="<?= $b['nomor_barang'] ?>">
+                      <?= $b['nama_barang'] ?> - Rp<?= $b['harga_jual'] ?> || Stok: <?= $b['stock_terakhir'] ?>
+                    </option>
+                  <?php endforeach; ?>
             </select>
 
             <label>Jumlah:</label>
             <input type="number" name="jumlah[]" min="1" required>
-
-            <label>Harga: Rp.</label>
-            <input type="number" name="harga[]" min="0" required>
 
             <button type="button" onclick="hapusRow(this)">Hapus</button>
         </div>
@@ -118,20 +97,17 @@ if (isset($_POST['simpan_penerimaan'])) {
     <button type="button" onclick="tambahRow()">+ Tambah Barang</button>
     <br><br>
 
-    <button type="submit" name="simpan_penerimaan">Simpan Penerimaan</button>
+    <button type="submit" name="simpan_penjualan">Simpan Penjualan</button>
 </form>
 
 
 <script>
-// =========================================
-// Duplikasi row
-// =========================================
+
 function tambahRow() {
     const container = document.getElementById('barang-container');
     const firstRow = container.children[0];
     const newRow = firstRow.cloneNode(true);
 
-    // reset nilai
     newRow.querySelectorAll('input').forEach(el => el.value = '');
     newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
 
@@ -140,9 +116,6 @@ function tambahRow() {
     updateDropdowns();
 }
 
-// =========================================
-// Hapus row
-// =========================================
 function hapusRow(btn) {
     const container = document.getElementById('barang-container');
     if (container.children.length > 1) {
@@ -153,9 +126,6 @@ function hapusRow(btn) {
     }
 }
 
-// =========================================
-// Cegah barang yang sama dipilih 2 kali
-// =========================================
 function updateDropdowns() {
     const selects = document.querySelectorAll('.barang-select');
 

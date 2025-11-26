@@ -1,15 +1,23 @@
 <?php
-  include '../../koneksi.php';
-  include '../../query.php';
+include '../../koneksi.php';
+include '../../query.php';
 
-  $jenis_view = ['all', 'aktif'];
-  $view = isset($_GET['view']) && in_array($_GET['view'], $jenis_view) ? $_GET['view'] : 'all';
+if (isset($_GET['aktifkan'])) {
+    $idmargin = intval($_GET['aktifkan']);
+    Query::aktifkan_margin($conn, $idmargin);
 
-  if ($view === 'aktif') {
-    $margin_list = Query::read_margin_aktif($conn);
-  } else {
-    $margin_list = Query::read_margin_all($conn);
-  }
+    header("Location: margin.php?view=" . ($_GET['view'] ?? 'all'));
+    exit;
+}
+
+$jenis_view = ['all', 'aktif'];
+$view = isset($_GET['view']) && in_array($_GET['view'], $jenis_view) ? $_GET['view'] : 'all';
+
+if ($view === 'aktif') {
+  $margin_list = Query::read_margin_aktif($conn);
+} else {
+  $margin_list = Query::read_margin_all($conn);
+}
 
 ?>
 
@@ -67,6 +75,7 @@
             <th>Status</th>
             <th>Dibuat Oleh</th>
             <th>Diperbarui Pada</th>
+            <th>Kelola Margin</th>
           </tr>
         </thead>
         <tbody>
@@ -79,6 +88,11 @@
               <td><?php echo $row['status_margin'] ? 'Aktif' : 'Tidak Aktif'; ?></td>
               <td><?php echo $row['dibuat_oleh']; ?></td>
               <td><?php echo $row['diupdate_pada']; ?></td>
+              <td>
+                <a href="?aktifkan=<?php echo $row['nomor_margin']; ?>&view=<?php echo $view; ?>">
+                  Aktifkan
+                </a>
+              </td>
             </tr>
           <?php } ?>
         </tbody>

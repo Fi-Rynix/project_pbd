@@ -77,6 +77,18 @@ class Query {
   }
 
 
+// crud
+// crud
+// crud
+  public static function aktifkan_margin($conn, $idmargin) {
+    $stmt = $conn->prepare("CALL aktifkan_margin(?)");
+    $stmt->bind_param("i", $idmargin);
+    $stmt->execute();
+    return true;
+  }
+
+
+
 // pengadaan
 // pengadaan
 // pengadaan
@@ -215,7 +227,65 @@ class Query {
 
 
 
-  
+// penjualan
+// penjualan
+// penjualan
+  public static function read_penjualan($conn) {
+    $query = $conn->prepare("SELECT * FROM penjualan_vu");
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public static function get_id_margin_aktif($conn) {
+    $query = $conn->prepare("SELECT nomor_margin FROM margin_penjualan_aktif_vu LIMIT 1");
+    $query->execute();
+    $result = $query->get_result();
+    $data = $result->fetch_assoc();
+    return $data['nomor_margin'];
+  }
+
+  public static function get_barang_from_stok_tambah_margin($conn) {
+    $query = $conn->prepare(
+      "SELECT b.nomor_barang, b.nama_barang,
+              b.harga_barang + (b.harga_barang * (SELECT persentase_margin / 100 FROM margin_penjualan_aktif_vu LIMIT 1)) AS harga_jual,
+              (SELECT ks.stock
+              FROM kartu_stok ks
+              WHERE ks.idkartu_stok = (SELECT MAX(idkartu_stok)
+                                      FROM kartu_stok
+                                      WHERE idbarang = b.nomor_barang)) AS stock_terakhir
+      FROM barang_aktif_vu b
+      WHERE (SELECT ks.stock
+            FROM kartu_stok ks
+            WHERE ks.idkartu_stok = (SELECT MAX(idkartu_stok)
+                                    FROM kartu_stok
+                                    WHERE idbarang = b.nomor_barang)) > 0
+      GROUP BY b.nomor_barang, b.nama_barang, harga_jual;
+      ");
+    $query->execute();
+    $result = $query->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+  }
+
+  public static function insert_penjualan($conn, $iduser, $idmargin) {
+    $stmt = $conn->prepare("INSERT INTO penjualan (iduser, idmargin_penjualan) VALUES (?, ?)");
+    $stmt->bind_param("ii", $iduser, $idmargin);
+    $stmt->execute();
+    return true;
+  }
+
+  public static function insert_detail_penjualan($conn, $idbarang, $jumlah) {
+    $stmt = $conn->prepare("CALL insert_detail_penjualan(?, ?)");
+    $stmt->bind_param("ii", $idbarang, $jumlah);
+    $stmt->execute();
+    return true;
+  }
+
+  public static function hitung_value_penjualan($conn) {
+    $stmt = $conn->prepare("CALL hitung_value_penjualan()");
+    $stmt->execute();
+    return true;
+  }
 
 }
 ?>

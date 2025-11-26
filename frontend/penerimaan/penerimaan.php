@@ -54,7 +54,7 @@
               <td><?php echo $a['nomor_pengadaan']; ?></td>
               <td><?php echo $a['waktu_pengadaan']; ?></td>
               <td><?php echo $a['nama_user']; ?></td>
-              <td><?php echo $a['subtotal_pengadaan']; ?></td>
+              <td><?php number_format($a['subtotal_pengadaan'], 0, ',', '.')?></td>
               <td><?php echo $a['ppn_pengadaan']; ?></td>
               <td><?php echo $a['total_pengadaan']; ?></td>
               <td><?php echo $a['nama_vendor']; ?></td>

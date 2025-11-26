@@ -52,9 +52,9 @@
               <td><?php echo $row['nomor_pengadaan']; ?></td>
               <td><?php echo $row['waktu_pengadaan']; ?></td>
               <td><?php echo $row['nama_user']; ?></td>
-              <td><?php echo $row['subtotal_pengadaan']; ?></td>
+              <td><?php number_format($row['subtotal_pengadaan'], 0, ',', '.')?></td>
               <td><?php echo $row['ppn_pengadaan']; ?></td>
-              <td><?php echo $row['total_pengadaan']; ?></td>
+              <td><?php number_format($row['total_pengadaan'], 0, ',', '.') ?></td>
               <td><?php echo $row['nama_vendor']; ?></td>
               <td><?php
                 switch ($row['status_pengadaan']) {
