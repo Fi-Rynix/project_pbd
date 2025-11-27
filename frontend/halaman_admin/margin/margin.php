@@ -1,19 +1,8 @@
 <?php
-include '../../koneksi.php';
-include '../../query.php';
+include '../../../koneksi.php';
+include '../../../query.php';
 
-if (isset($_GET['ubah_status'])) {
-    $idmargin = intval($_GET['ubah_status']);
-    Query::aktifkan_margin($conn, $idmargin);
-
-    header("Location: margin.php?view=" . ($_GET['view'] ?? 'all'));
-    exit;
-}
-
-$jenis_view = ['all', 'aktif'];
-$view = isset($_GET['view']) && in_array($_GET['view'], $jenis_view) ? $_GET['view'] : 'all';
-
-$margin_list = ($view === 'aktif') ? Query::read_margin_aktif($conn) : Query::read_margin_all($conn);
+$margin_list = Query::read_margin_all($conn);
 ?>
 
 <!DOCTYPE html>
@@ -143,62 +132,6 @@ $margin_list = ($view === 'aktif') ? Query::read_margin_aktif($conn) : Query::re
     text-align: left;
   }
 
-  a.status-btn {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  span.status-btn.active {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    background-color: #16a085;
-    color: white;
-    pointer-events: none;
-    cursor: default;
-  }
-
-  a.status-btn.active {
-    background-color: #16a085;
-    color: white;
-    pointer-events: none;
-    cursor: default;
-  }
-
-  a.status-btn.inactive {
-    background-color: #e74c3c;
-    color: white;
-  }
-
-  a.status-btn.inactive:hover {
-    background-color: #c0392b;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(231, 76, 60, 0.2);
-  }
-
-  .view-controls {
-    margin: 16px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .view-controls select {
-    padding: 10px 12px;
-    border: 1px solid #d0d7e0;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    transition: all 0.2s ease;
-  }
-
   .view-controls select:focus {
     outline: none;
     border-color: #1436a3;
@@ -238,19 +171,6 @@ $margin_list = ($view === 'aktif') ? Query::read_margin_aktif($conn) : Query::re
 <?php include '../Navbar/navbar.php'; ?>
 <div class="container">
   <h1>Tabel Margin Penjualan</h1>
-  <div class="button-group">
-    <a href="tambah_margin.php" class="btn">+ Tambah Margin</a>
-  </div>
-
-  <div class="view-controls">
-    <form method="get" id="viewForm">
-      <label for="view">Tampilkan: </label>
-      <select name="view" id="view" onchange="document.getElementById('viewForm').submit();">
-        <option value="all" <?= ($view === 'all') ? 'selected' : ''; ?>>Semua Margin</option>
-        <option value="aktif" <?= ($view === 'aktif') ? 'selected' : ''; ?>>Margin Aktif</option>
-      </select>
-    </form>
-  </div>
 
   <main>
     <table>
@@ -261,7 +181,7 @@ $margin_list = ($view === 'aktif') ? Query::read_margin_aktif($conn) : Query::re
           <th>Besaran Persen</th>
           <th>Dibuat Oleh</th>
           <th>Diperbarui Pada</th>
-          <th>Aksi</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -278,11 +198,9 @@ $margin_list = ($view === 'aktif') ? Query::read_margin_aktif($conn) : Query::re
           <td><?= $row['diupdate_pada']; ?></td>
           <td>
             <?php if ($status): ?>
-              <span class="status-btn active"><?= $btn_text ?></span>
+              <span style="color: #16a085; font-weight: 600;">Aktif</span>
             <?php else: ?>
-              <a href="?ubah_status=<?= $row['nomor_margin']; ?>&view=<?= $view; ?>" class="status-btn <?= $btn_class ?>">
-                <?= $btn_text ?>
-              </a>
+              <span style="color: #7f8c8d; font-weight: 600;">Nonaktif</span>
             <?php endif; ?>
           </td>
         </tr>

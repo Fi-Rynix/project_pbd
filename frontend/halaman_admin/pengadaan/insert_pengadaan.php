@@ -1,7 +1,7 @@
 <?php
 session_start();
-include '../../koneksi.php';
-include '../../query.php';
+include '../../../koneksi.php';
+include '../../../query.php';
 
 $iduser = $_SESSION['user']['id'];
 

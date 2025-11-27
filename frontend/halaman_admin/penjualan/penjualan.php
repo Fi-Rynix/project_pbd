@@ -1,15 +1,15 @@
 <?php
-  include '../../koneksi.php';
-  include '../../query.php';
+  include '../../../koneksi.php';
+  include '../../../query.php';
 
-  $pengadaan_list = Query::read_pengadaan($conn);
+  $penjualan_list = Query::read_penjualan($conn);
 ?>
 
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Data Pengadaan</title>
+    <title>Data Penjualan</title>
     <style>
       * {
         margin: 0;
@@ -36,10 +36,6 @@
         font-weight: 600;
         margin-bottom: 24px;
         color: #1a252f;
-      }
-
-      main {
-        margin-bottom: 32px;
       }
 
       .button-group {
@@ -74,8 +70,23 @@
       }
 
       a {
-        color: inherit;
+        color: white;
         text-decoration: none;
+        font-weight: 500;
+        padding: 8px 14px;
+        border-radius: 4px;
+        display: inline-block;
+        transition: all 0.2s ease;
+        background-color: #1436a3;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      a:hover {
+        background-color: #0d2a7a;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(20, 54, 163, 0.2);
       }
 
       table {
@@ -134,58 +145,11 @@
         text-align: left;
       }
 
-      td:nth-child(4),
       td:nth-child(5),
-      td:nth-child(6) {
+      td:nth-child(6),
+      td:nth-child(7) {
         text-align: right;
         font-variant-numeric: tabular-nums;
-      }
-
-      a.link-btn {
-        display: inline-block;
-        background-color: #1436a3;
-        color: white;
-        font-weight: 600;
-        text-decoration: none;
-        padding: 6px 12px;
-        border-radius: 4px;
-        font-size: 13px;
-        transition: all 0.2s ease;
-      }
-
-      a.link-btn:hover {
-        background-color: #0d2a7a;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(20, 54, 163, 0.2);
-      }
-
-      .badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 50px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: capitalize;
-      }
-
-      .badge-gray {
-        background-color: #ecf0f1;
-        color: #7f8c8d;
-      }
-
-      .badge-yellow {
-        background-color: #fdebd0;
-        color: #d68910;
-      }
-
-      .badge-green {
-        background-color: #d5f4e6;
-        color: #16a085;
-      }
-
-      .badge-red {
-        background-color: #fadbd8;
-        color: #c0392b;
       }
 
       @media (max-width: 768px) {
@@ -205,15 +169,6 @@
         th, td {
           padding: 10px 8px;
         }
-
-        .button-group {
-          flex-direction: column;
-        }
-
-        button, a.btn {
-          width: 100%;
-          text-align: center;
-        }
       }
     </style>
   </head>
@@ -221,67 +176,39 @@
   <body>
     <?php include '../Navbar/navbar.php'; ?>
     <div class="container">
-      <h1>Tabel Pengadaan</h1>
+      <h1>Tabel Penjualan</h1>
       <div class="button-group">
-        <a href="insert_pengadaan.php" class="btn">+ Tambah Pengadaan</a>
+        <a href="insert_penjualan.php" class="btn">+ Tambah Penjualan</a>
       </div>
-      <main>
       <table>
         <thead>
           <tr>
-            <th>ID Pengadaan</th>
-            <th>Waktu Pengadaan</th>
+            <th>ID Penjualan</th>
+            <th>Waktu Penjualan</th>
             <th>Penanggung Jawab</th>
+            <th>Margin Keuntungan</th>
             <th>Subtotal</th>
             <th>PPN</th>
             <th>Total</th>
-            <th>Vendor Barang</th>
-            <th>Status</th>
-            <th>Rincian Pengadaan</th>
+            <th>Rincian Penjualan</th>
           </tr>
         </thead>
         <tbody>
           <?php
-            foreach($pengadaan_list as $row){ ?>
+            foreach($penjualan_list as $row){ ?>
             <tr>
-              <td><?php echo $row['nomor_pengadaan']; ?></td>
-              <td><?php echo $row['waktu_pengadaan']; ?></td>
-              <td><?php echo $row['nama_user']; ?></td>
-              <td>Rp<?php echo number_format($row['subtotal_pengadaan'], 0, ',', '.'); ?></td>
-              <td><?php echo $row['ppn_pengadaan']; ?>%</td>
-              <td>Rp<?php echo number_format($row['total_pengadaan'], 0, ',', '.'); ?></td>
-              <td><?php echo $row['nama_vendor']; ?></td>
-              <td>
-                <?php
-                  $statusClass = '';
-                  $statusText = '';
-                  switch ($row['status_pengadaan']) {
-                    case 'M':
-                      $statusClass = 'badge-gray';
-                      $statusText = 'Memesan';
-                      break;
-                    case 'P':
-                      $statusClass = 'badge-yellow';
-                      $statusText = 'Proses';
-                      break;
-                    case 'S':
-                      $statusClass = 'badge-green';
-                      $statusText = 'Selesai';
-                      break;
-                    case 'B':
-                      $statusClass = 'badge-red';
-                      $statusText = 'Batal';
-                      break;
-                  }
-                ?>
-                <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-              </td>
-              <td><a href="detail_pengadaan.php?nomor_pengadaan=<?php echo $row['nomor_pengadaan']; ?>" class="link-btn">Detail</a></td>
+              <td><?= htmlspecialchars($row['nomor_penjualan']); ?></td>
+              <td><?= htmlspecialchars($row['waktu_penjualan']); ?></td>
+              <td><?= htmlspecialchars($row['nama_user']); ?></td>
+              <td><?= htmlspecialchars($row['persen_margin']); ?>%</td>
+              <td>Rp<?= number_format((double)$row['subtotal_penjualan'], 0, ',', '.') ?></td>
+              <td><?= number_format((double)$row['ppn_penjualan'], 0, ',', '.') ?>%</td>
+              <td>Rp<?= number_format((double)$row['total_penjualan'], 0, ',', '.') ?></td>
+              <td><a href="detail_penjualan.php?nomor_penjualan=<?= htmlspecialchars($row['nomor_penjualan']); ?>">Detail</a></td>
             </tr>
           <?php } ?>
         </tbody>
       </table>
-      </main>
     </div>
   </body>
 </html>

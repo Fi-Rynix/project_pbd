@@ -1,6 +1,6 @@
 <?php
-  include '../../koneksi.php';
-  include '../../query.php';
+  include '../../../koneksi.php';
+  include '../../../query.php';
 
   $idpengadaan = $_GET['nomor_pengadaan'];
 

@@ -72,7 +72,7 @@ session_start();
       <div class="welcome-card">
         <?php if (isset($_SESSION['user'])): ?>
           <h1>Selamat Datang, <?= htmlspecialchars($_SESSION['user']['username']); ?></h1>
-          <p class="welcome">Anda telah login sebagai superadmin. Silakan gunakan menu di atas untuk mengelola data sistem.</p>
+          <p class="welcome">Anda telah login sebagai admin. Silakan gunakan menu di atas untuk mengelola data sistem.</p>
         <?php else: ?>
           <h1>Anda belum login</h1>
           <p class="welcome">Silakan login terlebih dahulu untuk mengakses sistem.</p>

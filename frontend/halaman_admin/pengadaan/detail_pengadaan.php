@@ -1,20 +1,19 @@
 <?php
-  include '../../koneksi.php';
-  include '../../query.php';
+  include '../../../koneksi.php';
+  include '../../../query.php';
 
-  $idpenjualan = $_GET['nomor_penjualan'];
+  $idpengadaan = $_GET['nomor_pengadaan'];
 
-  $detail_penjualan = Query::read_detail_penjualan($conn, $idpenjualan);
+  $detail_pengadaan = Query::read_detail_pengadaan($conn, $idpengadaan);
 
-  // Ambil info umum (baris pertama)
-  $info = $detail_penjualan[0];
+  $info = $detail_pengadaan[0];
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Detail Penjualan #<?= htmlspecialchars($info['nomor_penjualan']) ?></title>
+  <title>Detail Pengadaan #<?= htmlspecialchars($info['nomor_pengadaan']) ?></title>
   <style>
     * {
       margin: 0;
@@ -27,13 +26,12 @@
       background-color: #f5f7fa;
       color: #2c3e50;
       line-height: 1.6;
-      margin: 0;
-      padding: 0;
     }
 
     .container {
+      max-width: 1000px;
+      margin: 0 auto;
       padding: 24px;
-      max-width: 100%;
     }
 
     h1 {
@@ -106,11 +104,37 @@
     .info-row span:first-child {
       font-weight: 600;
       color: #1436a3;
-      min-width: 150px;
+      min-width: 100px;
     }
 
     .info-row span:last-child {
       color: #555;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #1436a3;
+    }
+
+    .badge-gray {
+      color: #7f8c8d;
+    }
+
+    .badge-yellow {
+      color: #d68910;
+    }
+
+    .badge-green {
+      color: #16a085;
+    }
+
+    .badge-red {
+      color: #c0392b;
     }
 
     table {
@@ -136,10 +160,8 @@
       border: none;
     }
 
-    th:first-child,
-    th:nth-child(2),
-    th:nth-child(3) {
-      text-align: left;
+    th:first-child {
+      text-align: center;
     }
 
     td {
@@ -149,10 +171,8 @@
       font-size: 14px;
     }
 
-    td:first-child,
-    td:nth-child(2),
-    td:nth-child(3) {
-      text-align: left;
+    td:first-child {
+      text-align: center;
     }
 
     tbody tr:hover {
@@ -173,8 +193,13 @@
       color: #1436a3;
     }
 
+    tfoot td:last-child {
+      text-align: right;
+    }
+
     tfoot tr:last-child td {
       border-bottom: none;
+      color: #1436a3;
       font-size: 15px;
     }
 
@@ -202,37 +227,62 @@
   </style>
 </head>
 <body>
-
   <?php include '../Navbar/navbar.php'; ?>
+  
   <div class="container">
     <div class="button-group">
-      <a href="penjualan.php" class="btn">← Kembali</a>
+      <a href="pengadaan.php" class="btn">← Kembali</a>
     </div>
 
-    <h1>Detail Penjualan #<?= htmlspecialchars($info['nomor_penjualan']) ?></h1>
+    <h1>Detail Pengadaan #<?= htmlspecialchars($info['nomor_pengadaan']) ?></h1>
 
     <div class="info-box">
-      <div class="info-row"><span>Tanggal:</span> <span><?= htmlspecialchars($info['waktu_penjualan']) ?></span></div>
-      <div class="info-row"><span>User:</span> <span><?= htmlspecialchars($info['nama_user']) ?></span></div>
-      <div class="info-row"><span>Margin Keuntungan:</span> <span><?= htmlspecialchars($info['persen']) ?>%</span></div>
+      <div class="info-row">
+        <span>Tanggal:</span>
+        <span><?= htmlspecialchars($info['waktu_pengadaan']) ?></span>
+      </div>
+      <div class="info-row">
+        <span>Vendor:</span>
+        <span><?= htmlspecialchars($info['nama_vendor']) ?></span>
+      </div>
+      <div class="info-row">
+        <span>User:</span>
+        <span><?= htmlspecialchars($info['nama_user']) ?></span>
+      </div>
+      <div class="info-row">
+        <span>Status:</span>
+        <span>
+          <?php
+          $statusClass = '';
+          $statusText = '';
+          switch ($info['status_pengadaan']) {
+            case 'M': $statusClass = 'badge-gray'; $statusText = 'Memesan'; break;
+            case 'P': $statusClass = 'badge-yellow'; $statusText = 'Proses'; break;
+            case 'S': $statusClass = 'badge-green'; $statusText = 'Selesai'; break;
+            case 'B': $statusClass = 'badge-red'; $statusText = 'Batal'; break;
+            default: $statusText = htmlspecialchars($info['status_pengadaan']);
+          }
+          ?>
+          <span class="status-badge <?= $statusClass; ?>"><?= $statusText; ?></span>
+        </span>
+      </div>
     </div>
 
     <h2>Daftar Barang</h2>
-
     <table>
       <thead>
         <tr>
           <th>No</th>
           <th>Nama Barang</th>
           <th>Jenis</th>
-          <th>Harga Satuan</th>
+          <th>Harga</th>
           <th>Satuan</th>
           <th>Jumlah</th>
           <th>Subtotal</th>
         </tr>
       </thead>
       <tbody>
-        <?php foreach ($detail_penjualan as $i => $row): ?>
+        <?php foreach ($detail_pengadaan as $i => $row): ?>
           <?php
           $jenisLabel = '';
           switch ($row['jenis']) {
@@ -253,23 +303,21 @@
           </tr>
         <?php endforeach; ?>
       </tbody>
-
       <tfoot>
         <tr>
           <td colspan="6">Subtotal:</td>
-          <td>Rp<?= number_format($info['subtotal_penjualan'], 0, ',', '.') ?></td>
+          <td>Rp<?= number_format($info['subtotal_pengadaan'], 0, ',', '.') ?></td>
         </tr>
         <tr>
-          <td colspan="6">PPN:</td>
-          <td><?= number_format($info['ppn_penjualan'], 0, ',', '.') ?>%</td>
+          <td colspan="6">PPN (<?= htmlspecialchars($info['ppn_pengadaan']) ?>%):</td>
+          <td>Rp<?= number_format(($info['subtotal_pengadaan'] * $info['ppn_pengadaan'] / 100), 0, ',', '.') ?></td>
         </tr>
         <tr>
           <td colspan="6">Total:</td>
-          <td>Rp<?= number_format($info['total_penjualan'], 0, ',', '.') ?></td>
+          <td>Rp<?= number_format($info['total_pengadaan'], 0, ',', '.') ?></td>
         </tr>
       </tfoot>
     </table>
   </div>
-
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
-  include '../../koneksi.php';
-  include '../../query.php';
+  include '../../../koneksi.php';
+  include '../../../query.php';
 
   $pengadaan_list = Query::read_pengadaan($conn);
 ?>

@@ -1,15 +1,23 @@
 <?php
-  include '../../koneksi.php';
-  include '../../query.php';
+  include '../../../koneksi.php';
+  include '../../../query.php';
 
-  $pengadaan_list = Query::read_pengadaan($conn);
+  $jenis_view = ['all', 'aktif'];
+  $view = isset($_GET['view']) && in_array($_GET['view'], $jenis_view) ? $_GET['view'] : 'all';
+
+  if ($view === 'aktif') {
+    $barang = Query::read_barang_aktif($conn);
+  } else {
+    $barang = Query::read_barang_all($conn);
+  }
+
 ?>
 
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Data Pengadaan</title>
+    <title>Data Barang</title>
     <style>
       * {
         margin: 0;
@@ -134,13 +142,6 @@
         text-align: left;
       }
 
-      td:nth-child(4),
-      td:nth-child(5),
-      td:nth-child(6) {
-        text-align: right;
-        font-variant-numeric: tabular-nums;
-      }
-
       a.link-btn {
         display: inline-block;
         background-color: #1436a3;
@@ -151,6 +152,7 @@
         border-radius: 4px;
         font-size: 13px;
         transition: all 0.2s ease;
+        margin: 0 4px;
       }
 
       a.link-btn:hover {
@@ -159,33 +161,26 @@
         box-shadow: 0 2px 6px rgba(20, 54, 163, 0.2);
       }
 
-      .badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 50px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: capitalize;
+      .view-controls {
+        margin: 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
-      .badge-gray {
-        background-color: #ecf0f1;
-        color: #7f8c8d;
+      .view-controls select {
+        padding: 10px 12px;
+        border: 1px solid #d0d7e0;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.2s ease;
       }
 
-      .badge-yellow {
-        background-color: #fdebd0;
-        color: #d68910;
-      }
-
-      .badge-green {
-        background-color: #d5f4e6;
-        color: #16a085;
-      }
-
-      .badge-red {
-        background-color: #fadbd8;
-        color: #c0392b;
+      .view-controls select:focus {
+        outline: none;
+        border-color: #1436a3;
+        box-shadow: 0 0 0 3px rgba(20, 54, 163, 0.1);
       }
 
       @media (max-width: 768px) {
@@ -221,66 +216,41 @@
   <body>
     <?php include '../Navbar/navbar.php'; ?>
     <div class="container">
-      <h1>Tabel Pengadaan</h1>
-      <div class="button-group">
-        <a href="insert_pengadaan.php" class="btn">+ Tambah Pengadaan</a>
-      </div>
+      <h1>Tabel Barang</h1>
+
       <main>
-      <table>
-        <thead>
-          <tr>
-            <th>ID Pengadaan</th>
-            <th>Waktu Pengadaan</th>
-            <th>Penanggung Jawab</th>
-            <th>Subtotal</th>
-            <th>PPN</th>
-            <th>Total</th>
-            <th>Vendor Barang</th>
-            <th>Status</th>
-            <th>Rincian Pengadaan</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-            foreach($pengadaan_list as $row){ ?>
-            <tr>
-              <td><?php echo $row['nomor_pengadaan']; ?></td>
-              <td><?php echo $row['waktu_pengadaan']; ?></td>
-              <td><?php echo $row['nama_user']; ?></td>
-              <td>Rp<?php echo number_format($row['subtotal_pengadaan'], 0, ',', '.'); ?></td>
-              <td><?php echo $row['ppn_pengadaan']; ?>%</td>
-              <td>Rp<?php echo number_format($row['total_pengadaan'], 0, ',', '.'); ?></td>
-              <td><?php echo $row['nama_vendor']; ?></td>
-              <td>
-                <?php
-                  $statusClass = '';
-                  $statusText = '';
-                  switch ($row['status_pengadaan']) {
-                    case 'M':
-                      $statusClass = 'badge-gray';
-                      $statusText = 'Memesan';
-                      break;
-                    case 'P':
-                      $statusClass = 'badge-yellow';
-                      $statusText = 'Proses';
-                      break;
-                    case 'S':
-                      $statusClass = 'badge-green';
-                      $statusText = 'Selesai';
-                      break;
-                    case 'B':
-                      $statusClass = 'badge-red';
-                      $statusText = 'Batal';
-                      break;
-                  }
-                ?>
-                <span class="badge <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
-              </td>
-              <td><a href="detail_pengadaan.php?nomor_pengadaan=<?php echo $row['nomor_pengadaan']; ?>" class="link-btn">Detail</a></td>
-            </tr>
-          <?php } ?>
-        </tbody>
-      </table>
+  <table>
+    <thead>
+      <tr>
+        <th>ID Barang</th>
+        <th>Nama Barang</th>
+        <th>Jenis Barang</th>
+        <th>Satuan</th>
+        <th>Harga</th>
+        <th>Status</th>
+        <th>Vendor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($barang as $row): ?>
+        <tr>
+  <td><?= $row['nomor_barang']; ?></td>
+  <td><?= $row['nama_barang']; ?></td>
+  <td><?= $row['jenis_barang']; ?></td>
+  <td><?= $row['nama_satuan']; ?></td>
+  <td>Rp<?= number_format($row['harga_barang'], 0, ',', '.'); ?></td>
+  <td>
+    <?php if ($row['status_barang']): ?>
+      <span style="color: #16a085; font-weight: 600;">Aktif</span>
+    <?php else: ?>
+      <span style="color: #7f8c8d; font-weight: 600;">Tidak Aktif</span>
+    <?php endif; ?>
+  </td>
+  <td><?= $row['nama_vendor']; ?></td>
+</tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
       </main>
     </div>
   </body>

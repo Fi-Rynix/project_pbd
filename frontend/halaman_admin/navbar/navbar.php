@@ -149,12 +149,9 @@
 
   <body>
     <header>
-      <img src="../../Assets/logouner.png" alt="logouner">
+      <img src="../../../Assets/logouner.png" alt="logouner">
       <nav>
         <ul>
-          <li>
-            <a href="../kartu_stok/stok.php">Kartu Stok</a>
-          </li>
           <li class="dropdown">
             <a href="#">Transaksi</a>
             <div class="dropdown-content">
@@ -168,10 +165,6 @@
             <a href="#">Data Master</a>
             <div class="dropdown-content">
               <a href="../barang/barang.php">Data Barang</a>
-              <a href="../role/role.php">Data Role</a>
-              <a href="../satuan/satuan.php">Data Satuan</a>
-              <a href="../user/user.php">Data User</a>
-              <a href="../vendor/vendor.php">Data Vendor</a>
               <a href="../margin/margin.php">Data Margin Penjualan</a>
             </div>
           </li>

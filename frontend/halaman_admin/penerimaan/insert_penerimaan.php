@@ -1,57 +1,77 @@
 <?php
 session_start();
-include '../../koneksi.php';
-include '../../query.php';
+include '../../../koneksi.php';
+include '../../../query.php';
 
 $iduser = $_SESSION['user']['id'];
+$idpengadaan = $_GET['nomor_pengadaan'];
 
-$vendor_list = Query::read_vendor_aktif($conn);
+$barang = Query::get_barang_by_pengadaan($conn, $idpengadaan);
 
-$idvendor = $_POST['idvendor'] ?? null;
-$idpengadaan = null;
-$barang = [];
+if (!isset($_SESSION['stok_penerimaan'][$idpengadaan])) {
 
-if (!empty($idvendor)) {
-    $barang = Query::get_barang_by_vendor($conn, $idvendor);
+    $_SESSION['stok_penerimaan'][$idpengadaan] = [];
+
+    foreach ($barang as $b) {
+        $_SESSION['stok_penerimaan'][$idpengadaan][$b['idbarang']] = [
+            "nama"   => $b['nama'],
+            "jumlah" => $b['jumlah'],
+            "satuan" => $b['nama_satuan'],
+            "harga_satuan" => $b['harga_satuan']
+        ];
+    }
 }
 
+$stok = $_SESSION['stok_penerimaan'][$idpengadaan];
 
-if (isset($_POST['simpan_pengadaan'])) {
-    $idvendor = $_POST['idvendor'];
-    $idbarangArr = $_POST['idbarang'] ?? [];
-    $jumlahArr = $_POST['jumlah'] ?? [];
+if (isset($_POST['simpan_penerimaan'])) {
 
-    if (!$idvendor) {
-        die("Vendor belum dipilih!");
-    }
+    $conn->begin_transaction();
 
+    $tempStok = $_SESSION['stok_penerimaan'][$idpengadaan];
 
-    if (Query::insert_pengadaan($conn, $iduser, $idvendor)) {
-        // $idpengadaan = Query::get_last_idpengadaan($conn);
+    try {
+        if (!Query::insert_penerimaan($conn, $iduser, $idpengadaan)) {
+            throw new Exception("Insert penerimaan gagal");
+        }
 
-        for ($i = 0; $i < count($idbarangArr); $i++) {
-            $idbarang = $idbarangArr[$i];
-            $jumlah = $jumlahArr[$i];
-            if (!empty($idbarang) && !empty($jumlah)) {
-                Query::insert_detail_pengadaan($conn, $idbarang, $jumlah);
+        foreach ($_POST['idbarang'] as $i => $idbarang) {
+            $jumlah_terima = (int) $_POST['jumlah'][$i];
+            $harga_satuan  = (int) $_POST['harga'][$i];
+
+            $tempStok[$idbarang]['jumlah'] -= $jumlah_terima;
+            if ($tempStok[$idbarang]['jumlah'] < 0) {
+                $tempStok[$idbarang]['jumlah'] = 0;
+            }
+
+            $result = Query::insert_detail_penerimaan($conn, $idbarang, $jumlah_terima, $harga_satuan);
+
+            if ($result !== true) {
+                throw new Exception($result);
             }
         }
 
-        Query::hitung_value_pengadaan($conn);
+        $conn->commit();
 
-        header("Location: pengadaan.php");
+        $_SESSION['stok_penerimaan'][$idpengadaan] = $tempStok;
+
+        header("Location: rincian_penerimaan.php?nomor_pengadaan=$idpengadaan");
         exit;
-    } else {
-        echo "Gagal insert pengadaan: " . $conn->error;
+
+    } catch (Exception $e) {
+
+        echo "<script>alert('".$e->getMessage()."'); history.back();</script>";
+        exit;
     }
 }
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Tambah Pengadaan</title>
+    <title>Tambah Penerimaan</title>
     <style>
       * {
         margin: 0;
@@ -78,13 +98,6 @@ if (isset($_POST['simpan_pengadaan'])) {
         font-weight: 600;
         margin-bottom: 24px;
         margin-top: 16px;
-        color: #1a252f;
-      }
-
-      h3 {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 16px;
         color: #1a252f;
       }
 
@@ -127,12 +140,11 @@ if (isset($_POST['simpan_pengadaan'])) {
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         max-width: 1000px;
-        margin-bottom: 24px;
       }
 
       .barang-row {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr auto;
+        grid-template-columns: 1fr 1fr 1fr 1fr auto;
         gap: 12px;
         margin-bottom: 16px;
         padding: 16px;
@@ -261,94 +273,94 @@ if (isset($_POST['simpan_pengadaan'])) {
     </style>
 </head>
 <body>
-    <?php include '../navbar/navbar.php'; ?>
-    <div class="container">
-        <div class="button-group">
-            <a href="pengadaan.php" class="btn-kembali">← Kembali</a>
+
+<?php include '../navbar/navbar.php'; ?>
+<div class="container">
+  <div class="button-group">
+    <a href="rincian_penerimaan.php?nomor_pengadaan=<?= $idpengadaan ?>" class="btn-kembali">← Kembali</a>
+  </div>
+
+  <h2>Tambah Penerimaan Barang</h2>
+
+<form method="POST">
+
+    <div id="barang-container">
+
+        <div class="barang-row">
+            <div>
+              <label>Barang</label>
+              <select name="idbarang[]" class="barang-select" required onchange="updateDropdowns()">
+                  <option value="">-- Pilih Barang --</option>
+
+                  <?php foreach ($stok as $idb => $s): ?>
+                      <?php if ($s['jumlah'] > 0): ?>
+                          <option value="<?= $idb ?>" data-harga="<?= $s['harga_satuan'] ?>">
+                              <?= $s['nama'] ?> — (Sisa: <?= $s['jumlah'] . ' ' . $s['satuan'] ?>)
+                          </option>
+                      <?php endif; ?>
+                  <?php endforeach; ?>
+
+              </select>
+            </div>
+
+            <div>
+              <label>Jumlah</label>
+              <input type="number" name="jumlah[]" min="1" required>
+            </div>
+
+            <div>
+              <label>Harga (Rp)</label>
+              <input type="number" name="harga[]" min="0" required>
+            </div>
+
+            <button type="button" onclick="hapusRow(this)" class="hapus">Hapus</button>
         </div>
 
-        <h2>Tambah Pengadaan Baru</h2>
-
-    <form method="POST">
-        <label>Vendor:</label>
-        <select name="idvendor" required onchange="this.form.submit()">
-            <option value="">-- Pilih Vendor --</option>
-            <?php foreach ($vendor_list as $v):
-                $sel = ($idvendor == $v['nomor_vendor']) ? 'selected' : '';
-                echo "<option value='{$v['nomor_vendor']}' $sel>{$v['nama_vendor']}</option>";
-            endforeach; ?>
-        </select>
-            <!-- $vendor_list->data_seek(0);
-            while ($v = $vendor_list->fetch_assoc()) {
-                $sel = ($idvendor == $v['nomor_vendor']) ? 'selected' : '';
-                echo "<option value='{$v['nomor_vendor']}' $sel>{$v['nama_vendor']}</option>";
-            }
-            ?>
-        </select> -->
-        <!-- <noscript><button type="submit">Tampilkan Barang</button></noscript> -->
-    </form>
-
-<?php if (!empty($idvendor) && count($barang) > 0): ?>
-        <h3>Daftar Barang</h3>
-        <form method="POST">
-            <input type="hidden" name="idvendor" value="<?= htmlspecialchars($idvendor) ?>">
-
-            <div id="barang-container">
-                <div class="barang-row">
-                    <div>
-                      <label>Barang</label>
-                      <select name="idbarang[]" class="barang-select" required onchange="updateDropdowns()">
-                          <option value="">-- Pilih Barang --</option>
-                          <?php foreach ($barang as $b): ?>
-                              <option value="<?= $b['nomor_barang'] ?>">
-                                  <?= $b['nama_barang'] ?> - Rp<?= $b['harga_barang'] ?>
-                              </option>
-                          <?php endforeach; ?>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label>Jumlah</label>
-                      <input type="number" name="jumlah[]" min="1" required>
-                    </div>
-
-                    <button type="button" onclick="hapusRow(this)" class="hapus">Hapus</button>
-                </div>
-            </div>
-
-            <button type="button" onclick="tambahRow()">+ Tambah Barang</button>
-
-            <div class="form-actions">
-              <button type="submit" name="simpan_pengadaan">Simpan Pengadaan</button>
-            </div>
-        </form>
-    <?php elseif (!empty($idvendor)): ?>
-        <p><i>Tidak ada barang aktif untuk vendor ini.</i></p>
-    <?php endif; ?>
     </div>
 
-    <script>
-    function tambahRow() {
-        const container = document.getElementById('barang-container');
-        const firstRow = container.children[0];
-        const newRow = firstRow.cloneNode(true);
+    <button type="button" onclick="tambahRow()">+ Tambah Barang</button>
 
-        newRow.querySelectorAll('input').forEach(el => el.value = '');
-        newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
-        container.appendChild(newRow);
+    <div class="form-actions">
+      <button type="submit" name="simpan_penerimaan">Simpan Penerimaan</button>
+    </div>
+  </form>
+</div>
+
+<script>
+// =========================================
+// Duplikasi row
+// =========================================
+function tambahRow() {
+    const container = document.getElementById('barang-container');
+    const firstRow = container.children[0];
+    const newRow = firstRow.cloneNode(true);
+
+    // reset nilai
+    newRow.querySelectorAll('input').forEach(el => el.value = '');
+    newRow.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+    container.appendChild(newRow);
+
+    updateDropdowns();
+}
+
+// =========================================
+// Hapus row
+// =========================================
+function hapusRow(btn) {
+    const container = document.getElementById('barang-container');
+    if (container.children.length > 1) {
+        btn.parentElement.remove();
         updateDropdowns();
+    } else {
+        alert('Minimal 1 baris barang harus ada.');
     }
+}
 
-    function hapusRow(btn) {
-        const container = document.getElementById('barang-container');
-        if (container.children.length > 1) {
-            btn.parentElement.remove();
-        } else {
-            alert('Minimal 1 baris barang harus ada.');
-        }
-    }
-
-    function updateDropdowns() {
+// =========================================
+// Cegah barang yang sama dipilih 2 kali
+// =========================================
+function updateDropdowns() {
     const selects = document.querySelectorAll('.barang-select');
 
     const selectedValues = Array.from(selects)
@@ -369,6 +381,21 @@ if (isset($_POST['simpan_pengadaan'])) {
         });
     });
 }
-    </script>
+
+document.addEventListener("change", function(e) {
+    if (e.target.classList.contains('barang-select')) {
+
+        const row = e.target.closest('.barang-row');
+        const hargaInput = row.querySelector('input[name="harga[]"]');
+        const selectedOption = e.target.options[e.target.selectedIndex];
+
+        const harga = selectedOption.getAttribute("data-harga") || 0;
+        hargaInput.value = harga;
+    }
+});
+
+
+</script>
+
 </body>
 </html>

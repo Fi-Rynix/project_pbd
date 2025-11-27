@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../../koneksi.php';
+require_once '../koneksi.php';
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -29,11 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 switch ($row['idrole']) {
                     case 1:
                         // Admin
-                        header('Location: ../halaman_admin/dashboard.php');
+                        header('Location: dashboard/dashboard.php');
                         break;
                     case 2:
                         // Staff
-                        header('Location: ../halaman_staff/dashboard.php');
+                        header('Location: halaman_admin/dashboard/dashboard.php');
                         break;
                     default:
                         // Default ke dashboard umum
